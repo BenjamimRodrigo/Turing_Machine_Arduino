@@ -1,0 +1,176 @@
+/*
+  Projeto Avaliativo de Teoria da Computação - FACOL Faculdade Osman Lins - Vitória S. Antão - PE
+  Sistemas de Informação - Data de Apresentação: 30/11/2015
+  Período: 2 (2015.2)
+  Professor: Emmanuel Barreto
+  Autor: Benjamim Rodrigo
+*/
+
+//Rede Social: Twitter: @BenjamimRodrigo
+
+// Serão aceitas todas sequências que contenham os símbolos 100
+
+#include <LiquidCrystal.h>
+#include <Keypad.h>
+
+LiquidCrystal lcd(13, 12, 11, 10, 9, 8);// Configuração do LCD
+
+char key;// Guarda a tecla digitada
+String cadeia = "";// Guarda a cadeia digitada
+String estado = "q>";// Guarda o estado atual (q> é o estado padrão de inicio da maquina)
+
+const byte ROWS = 4;// Linhas do Teclado
+const byte COLS = 3;// Colunas do Teclado
+
+//Dfinindo os simbolos do Teclado
+char hexaKeys[ROWS][COLS] = {
+{'1','2','3'},
+{'4','5','6'},
+{'7','8','9'},
+{'*','0','#'}
+};
+
+byte rowPins[ROWS] = {4, 3, 14, 2};// Configuração das Linhas do teclado
+byte colPins[COLS] = {7, 6, 5};// Configuração das Colunas do teclado
+
+Keypad teclado = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);//Configurando o teclado
+
+void setup() {
+//Inicializando o LCD e informando o tamanho de 16 colunas e 2 linhas
+//que é o tamanho do LCD JHD 162A usado neste projeto.
+lcd.begin(13, 8);
+}
+
+void loop() {
+  key = teclado.getKey();// Lendo tecla digitada
+  lcd.clear();// Limpando LCD
+  lcd.setCursor(0,0);
+  lcd.print(" TURING MACHINE");//
+  lcd.setCursor(0,1);
+  lcd.print(" FACOL - SI");
+  delay(2000);
+  lcd.setCursor(0,0);
+  lcd.print("RODANDO PROGRAMA");
+  lcd.setCursor(0,1);
+  lcd.print(" CODIGO 001");
+  while(true){
+    key = teclado.getKey();
+    if (key){
+      DigitarCadeia:// Marcação para voltar depois
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print(" CADEIA");
+      lcd.setCursor(0,1);
+      while(true){
+        key = teclado.getKey();
+        if(key){
+          if (key == '1' | key == '0'){
+            lcd.print(key);
+            cadeia += key;
+          }
+          if (key == '#'){
+            lcd.clear();
+            while(true){
+            lcd.setCursor(0,0);
+            lcd.print(" # PARA INICIAR");
+            key = teclado.getKey();
+            if(key){
+              if (key == '#'){
+              lcd.clear();
+                for (int i=0; i <= cadeia.length(); i++){// Percorre a Cadeia digitada
+                  lcd.clear();
+                  lcd.setCursor(0,0);
+                  lcd.print(">" + cadeia);
+                  lcd.setCursor(i,1);
+                  lcd.print("^");
+                  while(true){
+                    key = teclado.getKey();
+                    if(key){
+                      if(key=='#'){
+                        // Abaixo está a lista de condições
+                        //Representando as Transições da MT
+                        if(estado == "q>"){
+                          estado = "q0";
+                          lcd.setCursor(0,0);
+                          lcd.print(">");
+                        }
+                        if(estado == "q0" & cadeia.charAt(i-1) == '0'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q0";
+                        }
+                        if(estado == "q0" & cadeia.charAt(i-1) == '1'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q1";
+                        }
+                        if(estado == "q0" & cadeia.charAt(i-1) == 'X'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q0";
+                        }
+                        if(estado == "q1" & cadeia.charAt(i-1) == '0'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q2";
+                        }
+                        if(estado == "q1" & cadeia.charAt(i-1) == '1'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q1";
+                          i--;
+                          i--;
+                        }
+                        if(estado == "q1" & cadeia.charAt(i-1) == 'X'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q1";
+                        }
+                        if(estado == "q2" & cadeia.charAt(i-1) == '0'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q3";
+                        }
+                        if(estado == "q2" & cadeia.charAt(i-1) == '1'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q1";
+                          i--;
+                          i--;
+                        }
+                        if(estado == "q2" & cadeia.charAt(i-1) == 'X'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q2";
+                        }
+                        if(estado == "q3" & cadeia.charAt(i-1) == '0'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q3";
+                        }
+                        if(estado == "q3" & cadeia.charAt(i-1) == '1'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q3";
+                        }
+                        if(estado == "q3" & cadeia.charAt(i-1) == 'X'){
+                          cadeia.setCharAt(i-1,'X');
+                          estado = "q3";
+                        }
+                        break;
+                      }
+                    }
+                  }
+                }// Final do FOR
+                lcd.clear();
+                lcd.setCursor(0,0);
+                if(estado == "q3"){// Verifica se a CADEIA foi aceita
+                  lcd.print(" CADEIA ACEITA");
+                } else {
+                  lcd.print("CADEIA RECUSADA!");
+                }
+                lcd.setCursor(0,1);
+                lcd.print("Estado Final: ");
+                lcd.print(estado);
+                delay(3000);
+                cadeia = "";// Zera a cadeia
+                estado = "q>";// Zera o estado
+                goto DigitarCadeia;// Volta para digitar uma nova CADEIA
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
